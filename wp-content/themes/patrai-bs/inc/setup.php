@@ -23,6 +23,29 @@ function patrai_bs_setup() {
 }
 add_action( 'after_setup_theme', 'patrai_bs_setup' );
 
+/**
+ * Repair clean permalinks once after the Git/database deployment.
+ *
+ * The source site used date permalinks and the target temporarily fell back to
+ * index.php URLs. A hard flush preserves any hosting rules while rebuilding
+ * WordPress' rewrite block for the public page and product URLs used by the
+ * theme.
+ */
+function patrai_bs_repair_deployment_rewrites() {
+	$repair_version = '1.0.0';
+	if ( $repair_version === get_option( 'patrai_bs_rewrite_repair_version' ) ) {
+		return;
+	}
+
+	if ( '/%postname%/' !== get_option( 'permalink_structure' ) ) {
+		update_option( 'permalink_structure', '/%postname%/' );
+	}
+
+	flush_rewrite_rules( true );
+	update_option( 'patrai_bs_rewrite_repair_version', $repair_version, false );
+}
+add_action( 'init', 'patrai_bs_repair_deployment_rewrites', PHP_INT_MAX );
+
 function patrai_bs_assets() {
 	wp_enqueue_style( 'patrai-bs-bootstrap', PATRAI_BS_URI . '/assets/css/bootstrap.min.css', array(), '5.3.8' );
 	wp_enqueue_style( 'patrai-bs-theme', PATRAI_BS_URI . '/assets/css/theme.css', array( 'patrai-bs-bootstrap' ), PATRAI_BS_VERSION );
