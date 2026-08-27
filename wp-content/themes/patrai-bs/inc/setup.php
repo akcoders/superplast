@@ -51,7 +51,7 @@ add_action( 'init', 'patrai_bs_repair_deployment_rewrites', PHP_INT_MAX );
  * Purge the pre-migration LiteSpeed page/object cache once on the live theme.
  */
 function patrai_bs_purge_deployment_cache() {
-	$purge_version = '1.0.0';
+	$purge_version = '1.0.1';
 	if ( $purge_version === get_option( 'patrai_bs_cache_purge_version' ) ) {
 		return;
 	}
@@ -136,6 +136,88 @@ function patrai_bs_whatsapp_url() {
 	return 'https://wa.me/' . $number . '?text=' . rawurlencode( 'Hello Super Plast, I would like to discuss a requirement.' );
 }
 
+/**
+ * Register a migrated Super Plast image when the database attachment row did
+ * not travel with the Git-managed uploads directory.
+ *
+ * The original image files are already present below
+ * wp-content/uploads/superplast-company. Registering them in place avoids a
+ * second copy and restores normal WordPress featured-image/gallery editing.
+ *
+ * @param string $source_path Path relative to the superplast-company folder.
+ * @return int Attachment ID, or zero when the file cannot be registered.
+ */
+function patrai_bs_register_legacy_attachment( $source_path ) {
+	$source_path = ltrim( wp_normalize_path( (string) $source_path ), '/' );
+	if ( '' === $source_path || false !== strpos( $source_path, '../' ) ) {
+		return 0;
+	}
+
+	$uploads      = wp_upload_dir();
+	$relative     = 'superplast-company/' . $source_path;
+	$uploads_base = trailingslashit( wp_normalize_path( $uploads['basedir'] ) );
+	$file         = wp_normalize_path( $uploads_base . $relative );
+
+	if ( 0 !== strpos( $file, $uploads_base ) || ! is_file( $file ) || ! is_readable( $file ) ) {
+		return 0;
+	}
+
+	$existing = get_posts(
+		array(
+			'post_type'      => 'attachment',
+			'post_status'    => 'inherit',
+			'posts_per_page' => 1,
+			'fields'         => 'ids',
+			'meta_key'       => '_wp_attached_file',
+			'meta_value'     => $relative,
+		)
+	);
+	if ( $existing ) {
+		update_post_meta( (int) $existing[0], '_spm_source_path', $source_path );
+		return (int) $existing[0];
+	}
+
+	$filetype = wp_check_filetype( wp_basename( $file ) );
+	if ( empty( $filetype['type'] ) || 0 !== strpos( $filetype['type'], 'image/' ) ) {
+		return 0;
+	}
+
+	$title         = pathinfo( wp_basename( $file ), PATHINFO_FILENAME );
+	$attachment_id = wp_insert_attachment(
+		array(
+			'guid'           => trailingslashit( $uploads['baseurl'] ) . $relative,
+			'post_mime_type' => $filetype['type'],
+			'post_title'     => sanitize_text_field( str_replace( array( '-', '_' ), ' ', $title ) ),
+			'post_content'   => '',
+			'post_status'    => 'inherit',
+		),
+		$file
+	);
+	if ( ! $attachment_id || is_wp_error( $attachment_id ) ) {
+		return 0;
+	}
+
+	update_post_meta( $attachment_id, '_spm_source_path', $source_path );
+	update_post_meta( $attachment_id, '_wp_attached_file', $relative );
+
+	$image_size = wp_getimagesize( $file );
+	if ( $image_size ) {
+		wp_update_attachment_metadata(
+			$attachment_id,
+			array(
+				'width'      => (int) $image_size[0],
+				'height'     => (int) $image_size[1],
+				'file'       => $relative,
+				'filesize'   => (int) filesize( $file ),
+				'sizes'      => array(),
+				'image_meta' => array(),
+			)
+		);
+	}
+
+	return (int) $attachment_id;
+}
+
 function patrai_bs_asset_attachment_id( $source_path ) {
 	static $cache = array();
 	if ( isset( $cache[ $source_path ] ) ) {
@@ -151,7 +233,7 @@ function patrai_bs_asset_attachment_id( $source_path ) {
 			'meta_value'     => $source_path,
 		)
 	);
-	$cache[ $source_path ] = $posts ? (int) $posts[0] : 0;
+	$cache[ $source_path ] = $posts ? (int) $posts[0] : patrai_bs_register_legacy_attachment( $source_path );
 	return $cache[ $source_path ];
 }
 

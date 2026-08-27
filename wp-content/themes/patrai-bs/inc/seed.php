@@ -297,3 +297,141 @@ function patrai_bs_seed_feature_cards() {
 	update_option( 'patrai_bs_feature_seed_version', '1.0.0', false );
 }
 add_action( 'init', 'patrai_bs_seed_feature_cards', 60 );
+
+/**
+ * Image paths used by starter records other than the imported product catalog.
+ *
+ * @return array Seed key => legacy image path.
+ */
+function patrai_bs_seed_media_map() {
+	return array(
+		'slide-cooling'                      => 'img/slider/slider02.jpg',
+		'slide-water'                        => 'img/slider/waste-water-banner.jpg',
+		'slide-building'                     => 'img/slider/slider(building).jpg',
+		'slide-profiles'                     => 'img/slider/slider4-PVC_banner.jpg',
+		'case-cooling-fill-selection'        => 'img/products/CoolingTowerComponents/large-slider-cooling-tower/IMG_6598.jpg',
+		'case-biological-media-application'  => 'img/products/WaterTechnology/homeSlider/water03.jpg',
+		'case-frp-access-drainage'            => 'img/products/building/frp-grating/Frp-slider-img/FRP.jpg',
+		'case-custom-pvc-profile'             => 'img/products/polymer_sheets/PVC1.jpeg',
+		'feature-advanced-polymer-technology' => 'img/products/CoolingTowerComponents/large-slider-cooling-tower/shot-36.jpg',
+		'feature-application-led-engineering' => 'img/products/WaterTechnology/homeSlider/water02.jpg',
+		'feature-manufacturing-experience'    => 'img/products/building/louvers_fins/b3.jpeg',
+		'feature-responsive-customer-support' => 'img/home/buildingProducts.jpg',
+	);
+}
+
+/**
+ * Determine whether migrated dynamic records already have their media links.
+ */
+function patrai_bs_legacy_media_links_complete() {
+	$records = get_posts(
+		array(
+			'post_type'      => array( 'patrai_product', 'patrai_slide', 'patrai_case', 'patrai_feature' ),
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+		)
+	);
+	if ( ! $records ) {
+		return false;
+	}
+	foreach ( $records as $record_id ) {
+		if ( ! has_post_thumbnail( $record_id ) ) {
+			return false;
+		}
+	}
+	return true;
+}
+
+/**
+ * Restore attachment rows and dynamic image relationships after deployment.
+ */
+function patrai_bs_repair_legacy_media_links() {
+	$repair_version = '1.0.0';
+	if ( $repair_version === get_option( 'patrai_bs_media_repair_version' ) ) {
+		return;
+	}
+
+	// Existing development installations already contain full attachment data.
+	if ( patrai_bs_legacy_media_links_complete() ) {
+		update_option( 'patrai_bs_media_repair_version', $repair_version, false );
+		update_option( 'patrai_bs_media_metadata_version', $repair_version, false );
+		return;
+	}
+
+	$result = patrai_bs_import_legacy_product_catalog( true );
+	if ( is_wp_error( $result ) ) {
+		return;
+	}
+
+	foreach ( patrai_bs_seed_media_map() as $seed_key => $image_path ) {
+		$posts = get_posts(
+			array(
+				'post_type'      => array( 'patrai_slide', 'patrai_case', 'patrai_feature' ),
+				'post_status'    => 'any',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'meta_key'       => '_patrai_bs_seed_key',
+				'meta_value'     => $seed_key,
+			)
+		);
+		$image_id = patrai_bs_asset_attachment_id( $image_path );
+		if ( $posts && $image_id ) {
+			set_post_thumbnail( (int) $posts[0], $image_id );
+		}
+	}
+
+	update_option( 'patrai_bs_media_repair_version', $repair_version, false );
+	delete_option( 'patrai_bs_media_metadata_version' );
+	do_action( 'litespeed_purge_all', 'PATRAI BS media repair' );
+	do_action( 'litespeed_purge_all_object' );
+	wp_cache_flush();
+}
+add_action( 'init', 'patrai_bs_repair_legacy_media_links', 70 );
+
+/**
+ * Generate responsive derivatives in small batches to protect page speed and
+ * avoid a long first request on shared hosting.
+ */
+function patrai_bs_generate_legacy_media_metadata_batch() {
+	$metadata_version = '1.0.0';
+	if ( $metadata_version === get_option( 'patrai_bs_media_metadata_version' ) ||
+		'1.0.0' !== get_option( 'patrai_bs_media_repair_version' ) ) {
+		return;
+	}
+
+	$attachments = get_posts(
+		array(
+			'post_type'      => 'attachment',
+			'post_status'    => 'inherit',
+			'posts_per_page' => 4,
+			'orderby'        => 'ID',
+			'order'          => 'ASC',
+			'fields'         => 'ids',
+			'meta_query'     => array(
+				'relation' => 'AND',
+				array( 'key' => '_spm_source_path', 'compare' => 'EXISTS' ),
+				array( 'key' => '_patrai_bs_metadata_generated', 'compare' => 'NOT EXISTS' ),
+			),
+		)
+	);
+
+	if ( ! $attachments ) {
+		update_option( 'patrai_bs_media_metadata_version', $metadata_version, false );
+		do_action( 'litespeed_purge_all', 'PATRAI BS responsive media ready' );
+		return;
+	}
+
+	require_once ABSPATH . 'wp-admin/includes/image.php';
+	foreach ( $attachments as $attachment_id ) {
+		$file = get_attached_file( $attachment_id );
+		if ( $file && is_readable( $file ) ) {
+			$metadata = wp_generate_attachment_metadata( $attachment_id, $file );
+			if ( $metadata ) {
+				wp_update_attachment_metadata( $attachment_id, $metadata );
+			}
+		}
+		update_post_meta( $attachment_id, '_patrai_bs_metadata_generated', 1 );
+	}
+}
+add_action( 'init', 'patrai_bs_generate_legacy_media_metadata_batch', 80 );

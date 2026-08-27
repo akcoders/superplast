@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'PATRAI_BS_VERSION', '1.2.4' );
+define( 'PATRAI_BS_VERSION', '1.2.5' );
 define( 'PATRAI_BS_DIR', get_template_directory() );
 define( 'PATRAI_BS_URI', get_template_directory_uri() );
 
