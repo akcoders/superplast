@@ -32,13 +32,14 @@ add_action( 'after_setup_theme', 'patrai_bs_setup' );
  * theme.
  */
 function patrai_bs_repair_deployment_rewrites() {
-	$repair_version = '1.0.0';
+	$repair_version = '1.0.1';
 	if ( $repair_version === get_option( 'patrai_bs_rewrite_repair_version' ) ) {
 		return;
 	}
 
-	if ( '/%postname%/' !== get_option( 'permalink_structure' ) ) {
-		update_option( 'permalink_structure', '/%postname%/' );
+	global $wp_rewrite;
+	if ( '/%postname%/' !== $wp_rewrite->permalink_structure ) {
+		$wp_rewrite->set_permalink_structure( '/%postname%/' );
 	}
 
 	flush_rewrite_rules( true );
