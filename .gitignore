@@ -3,12 +3,16 @@ wp-config.php
 .htaccess
 
 # Runtime-generated content
-wp-content/uploads/
 wp-content/cache/
 wp-content/upgrade/
 wp-content/backup*/
 wp-content/advanced-cache.php
 wp-content/object-cache.php
+
+# Keep production media in Git, but exclude demo-import working files
+wp-content/uploads/**/demo-content-import-file_*.xml
+wp-content/uploads/**/demo-widgets-import-file_*.json
+wp-content/uploads/**/log_file_*.txt
 
 # Logs and database exports
 *.log
@@ -19,3 +23,19 @@ wp-content/object-cache.php
 .DS_Store
 .idea/
 .vscode/
+build/
+scripts/
+
+# Inactive legacy/licensed packages are not required by PATRAI BS
+wp-content/plugins/LayerSlider/
+wp-content/plugins/designthemes-core-features/
+wp-content/plugins/designthemes-portfolio-addon/
+wp-content/plugins/envato-market/
+wp-content/plugins/js_composer/
+wp-content/plugins/kirki/
+wp-content/plugins/one-click-demo-import/
+wp-content/plugins/revslider/
+wp-content/plugins/superplast-content-migrator/
+wp-content/plugins/ultimate-vc-addons/
+wp-content/themes/patrai/
+wp-content/themes/patrai-child/

@@ -1,0 +1,4 @@
+.patrai-gallery-preview { display: flex; flex-wrap: wrap; gap: 10px; min-height: 80px; padding: 12px 0; }
+.patrai-gallery-preview:empty::before { align-items: center; background: #f6f7f7; border: 1px dashed #a7aaad; color: #646970; content: attr(data-empty-text); display: flex; justify-content: center; min-height: 76px; width: 100%; }
+.patrai-gallery-preview span { background: #fff; border: 1px solid #dcdcde; border-radius: 4px; display: block; height: 92px; overflow: hidden; padding: 3px; width: 92px; }
+.patrai-gallery-preview img { height: 100%; object-fit: cover; width: 100%; }
