@@ -1,0 +1,21 @@
+# Local WordPress configuration and web-server rules
+wp-config.php
+.htaccess
+
+# Runtime-generated content
+wp-content/uploads/
+wp-content/cache/
+wp-content/upgrade/
+wp-content/backup*/
+wp-content/advanced-cache.php
+wp-content/object-cache.php
+
+# Logs and database exports
+*.log
+*.sql
+*.sql.gz
+
+# Local tooling
+.DS_Store
+.idea/
+.vscode/
