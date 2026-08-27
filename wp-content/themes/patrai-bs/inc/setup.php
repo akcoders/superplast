@@ -51,7 +51,7 @@ add_action( 'init', 'patrai_bs_repair_deployment_rewrites', PHP_INT_MAX );
  * Purge the pre-migration LiteSpeed page/object cache once on the live theme.
  */
 function patrai_bs_purge_deployment_cache() {
-	$purge_version = '1.0.1';
+	$purge_version = '1.0.2';
 	if ( $purge_version === get_option( 'patrai_bs_cache_purge_version' ) ) {
 		return;
 	}

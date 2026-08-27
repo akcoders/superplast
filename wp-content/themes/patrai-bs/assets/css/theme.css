@@ -140,10 +140,10 @@ img { height: auto; max-width: 100%; }
 .sector-copy em { color: rgba(255,255,255,.78); font-size: .86rem; font-style: normal; line-height: 1.55; margin-bottom: 19px; }
 .sector-copy b { align-items: center; display: inline-flex; font-size: .76rem; gap: 7px; letter-spacing: .06em; text-transform: uppercase; }
 
-.journey-steps { position: relative; }
-.journey-steps::before { background: var(--patrai-line); bottom: 28px; content: ""; left: 61px; position: absolute; top: 28px; width: 2px; }
+.journey-steps { --journey-line-width: 2px; --journey-marker-size: 76px; position: relative; }
+.journey-steps::before { background: var(--patrai-line); bottom: 28px; content: ""; left: calc((var(--journey-marker-size) - var(--journey-line-width)) / 2); position: absolute; top: 28px; width: var(--journey-line-width); }
 .journey-step { align-items: center; display: grid; gap: 28px; grid-template-columns: 122px 1fr; padding: 16px 0; position: relative; }
-.journey-step > span { align-items: center; background: #fff; border: 6px solid var(--patrai-soft); border-radius: 50%; color: var(--patrai-primary); display: flex; font-size: .8rem; font-weight: 850; height: 76px; justify-content: center; position: relative; width: 76px; z-index: 2; }
+.journey-step > span { align-items: center; background: #fff; border: 6px solid var(--patrai-soft); border-radius: 50%; color: var(--patrai-primary); display: flex; font-size: .8rem; font-weight: 850; height: var(--journey-marker-size); justify-content: center; position: relative; width: var(--journey-marker-size); z-index: 2; }
 .journey-step h3 { font-size: 1.13rem; font-weight: 780; margin: 0 0 4px; }
 .journey-step p { color: var(--patrai-muted); font-size: .86rem; line-height: 1.55; margin: 0; }
 
@@ -353,9 +353,8 @@ textarea.form-control { min-height: 150px; }
   .page-hero h1 { font-size: clamp(2.5rem, 12vw, 3.8rem); }
   .focus-grid a { align-items: flex-start; gap: 6px; grid-template-columns: 1fr; padding: 20px; }
   .group-heading { align-items: flex-start; flex-direction: column; }
+  .journey-steps { --journey-marker-size: 64px; }
   .journey-step { gap: 12px; grid-template-columns: 90px 1fr; }
-  .journey-steps::before { left: 38px; }
-  .journey-step > span { height: 64px; width: 64px; }
   .future-panel { padding: 30px; }
   .case-single-hero, .single-product-hero { padding: 60px 0; }
   .contact-form-card { padding: 28px 21px; }
