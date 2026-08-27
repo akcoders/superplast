@@ -13,6 +13,7 @@ wp-content/object-cache.php
 wp-content/uploads/**/demo-content-import-file_*.xml
 wp-content/uploads/**/demo-widgets-import-file_*.json
 wp-content/uploads/**/log_file_*.txt
+wp-content/uploads/.superplast-migration-complete
 
 # Logs and database exports
 *.log
