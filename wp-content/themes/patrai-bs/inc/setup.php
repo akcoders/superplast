@@ -47,6 +47,28 @@ function patrai_bs_repair_deployment_rewrites() {
 }
 add_action( 'init', 'patrai_bs_repair_deployment_rewrites', PHP_INT_MAX );
 
+/**
+ * Purge the pre-migration LiteSpeed page/object cache once on the live theme.
+ */
+function patrai_bs_purge_deployment_cache() {
+	$purge_version = '1.0.0';
+	if ( $purge_version === get_option( 'patrai_bs_cache_purge_version' ) ) {
+		return;
+	}
+
+	do_action( 'litespeed_purge_all', 'PATRAI BS deployment' );
+	do_action( 'litespeed_purge_all_object' );
+	wp_cache_flush();
+
+	if ( ! headers_sent() ) {
+		header( 'X-LiteSpeed-Purge: public,*', false );
+		header( 'Cache-Control: no-cache, no-store, must-revalidate, max-age=0' );
+	}
+
+	update_option( 'patrai_bs_cache_purge_version', $purge_version, false );
+}
+add_action( 'template_redirect', 'patrai_bs_purge_deployment_cache', 0 );
+
 function patrai_bs_assets() {
 	wp_enqueue_style( 'patrai-bs-bootstrap', PATRAI_BS_URI . '/assets/css/bootstrap.min.css', array(), '5.3.8' );
 	wp_enqueue_style( 'patrai-bs-theme', PATRAI_BS_URI . '/assets/css/theme.css', array( 'patrai-bs-bootstrap' ), PATRAI_BS_VERSION );
