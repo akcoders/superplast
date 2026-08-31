@@ -46,6 +46,7 @@
 						'menu_class'     => 'navbar-nav ms-auto align-items-xl-center',
 						'fallback_cb'    => 'patrai_bs_menu_fallback',
 						'depth'          => 2,
+						'walker'         => new Patrai_BS_Primary_Nav_Walker(),
 					)
 				);
 				?>

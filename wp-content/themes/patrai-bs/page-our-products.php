@@ -11,12 +11,15 @@ get_template_part( 'template-parts/page', 'hero', array( 'title' => 'Our Product
 	<section class="section-space"><div class="container">
 		<?php $page = get_page_by_path( 'our-products' ); if ( $page ) : ?><div class="listing-intro entry-content"><?php echo apply_filters( 'the_content', $page->post_content ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div><?php endif; ?>
 		<?php
-		$terms = get_terms( array( 'taxonomy' => 'patrai_product_category', 'hide_empty' => true ) );
-		$terms = is_wp_error( $terms ) ? array() : $terms;
-		$order = array( 'Cooling Tower Components', 'Water & Wastewater Technology', 'Building Products & PVC Profiles' );
-		usort( $terms, function ( $a, $b ) use ( $order ) { $a_name = html_entity_decode( $a->name, ENT_QUOTES | ENT_HTML5, 'UTF-8' ); $b_name = html_entity_decode( $b->name, ENT_QUOTES | ENT_HTML5, 'UTF-8' ); $a_key = array_search( $a_name, $order, true ); $b_key = array_search( $b_name, $order, true ); return ( false === $a_key ? 99 : $a_key ) <=> ( false === $b_key ? 99 : $b_key ); } );
+		$terms = array();
+		foreach ( patrai_bs_product_verticals() as $vertical ) {
+			$term = get_term_by( 'slug', $vertical['slug'], 'patrai_product_category' );
+			if ( $term && ! is_wp_error( $term ) && $term->count ) {
+				$terms[] = $term;
+			}
+		}
 		?>
-		<?php if ( $terms ) : ?><nav class="product-family-nav" aria-label="Product families"><?php foreach ( $terms as $term ) : ?><a href="#<?php echo esc_attr( $term->slug ); ?>"><span><?php echo esc_html( str_pad( (string) $term->count, 2, '0', STR_PAD_LEFT ) ); ?></span><?php echo esc_html( $term->name ); ?></a><?php endforeach; ?></nav><?php endif; ?>
+		<?php if ( $terms ) : ?><nav class="product-family-nav" aria-label="Product families"><?php foreach ( $terms as $index => $term ) : ?><a href="#<?php echo esc_attr( $term->slug ); ?>"><span><?php echo esc_html( 'V' . ( $index + 1 ) ); ?></span><?php echo esc_html( $term->name ); ?></a><?php endforeach; ?></nav><?php endif; ?>
 		<?php foreach ( $terms as $term ) : ?>
 			<section class="product-group" id="<?php echo esc_attr( $term->slug ); ?>"><div class="group-heading"><div><span class="eyebrow text-primary">Product family</span><h2><?php echo esc_html( $term->name ); ?></h2></div><span class="group-count"><?php echo esc_html( $term->count ); ?> solutions</span></div>
 			<div class="row g-4">

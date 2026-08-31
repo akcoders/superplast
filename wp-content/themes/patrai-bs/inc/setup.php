@@ -51,7 +51,7 @@ add_action( 'init', 'patrai_bs_repair_deployment_rewrites', PHP_INT_MAX );
  * Purge the pre-migration LiteSpeed page/object cache once on the live theme.
  */
 function patrai_bs_purge_deployment_cache() {
-	$purge_version = '1.0.2';
+	$purge_version = '1.1.0';
 	if ( $purge_version === get_option( 'patrai_bs_cache_purge_version' ) ) {
 		return;
 	}
@@ -73,6 +73,7 @@ function patrai_bs_assets() {
 	wp_enqueue_style( 'patrai-bs-bootstrap', PATRAI_BS_URI . '/assets/css/bootstrap.min.css', array(), '5.3.8' );
 	wp_enqueue_style( 'patrai-bs-theme', PATRAI_BS_URI . '/assets/css/theme.css', array( 'patrai-bs-bootstrap' ), PATRAI_BS_VERSION );
 	wp_enqueue_script( 'patrai-bs-bootstrap', PATRAI_BS_URI . '/assets/js/bootstrap.bundle.min.js', array(), '5.3.8', true );
+	wp_enqueue_script( 'patrai-bs-theme', PATRAI_BS_URI . '/assets/js/theme.js', array( 'patrai-bs-bootstrap' ), PATRAI_BS_VERSION, true );
 }
 add_action( 'wp_enqueue_scripts', 'patrai_bs_assets' );
 
@@ -134,6 +135,10 @@ function patrai_bs_phone_href( $phone ) {
 function patrai_bs_whatsapp_url() {
 	$number = preg_replace( '/\D+/', '', patrai_bs_option( 'whatsapp' ) );
 	return 'https://wa.me/' . $number . '?text=' . rawurlencode( 'Hello Super Plast, I would like to discuss a requirement.' );
+}
+
+function patrai_bs_maps_url() {
+	return 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode( patrai_bs_option( 'address' ) );
 }
 
 /**
@@ -280,7 +285,13 @@ function patrai_bs_menu_fallback() {
 	echo '<ul class="navbar-nav ms-auto align-items-xl-center">';
 	foreach ( $items as $label => $url ) {
 		$target = 'Download Brochure' === $label ? ' target="_blank" rel="noopener"' : '';
-		echo '<li class="menu-item"><a href="' . esc_url( $url ) . '"' . $target . '>' . esc_html( $label ) . '</a></li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		$is_products = 'Our Products' === $label;
+		$class       = $is_products ? 'menu-item menu-item-has-children patrai-products-menu' : 'menu-item';
+		echo '<li class="' . esc_attr( $class ) . '"><a' . ( $is_products ? ' class="product-menu-link" aria-haspopup="true" aria-controls="patrai-product-mega-menu"' : '' ) . ' href="' . esc_url( $url ) . '"' . $target . '>' . esc_html( $label ) . '</a>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		if ( $is_products && function_exists( 'patrai_bs_product_mega_menu' ) ) {
+			echo patrai_bs_product_mega_menu(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
+		echo '</li>';
 	}
 	echo '</ul>';
 }
@@ -291,6 +302,8 @@ function patrai_bs_icon( $name, $class = '' ) {
 		'mail'      => '<path d="M3 5h18v14H3V5zm9 7 7-5H5l7 5zm0 2.4L5 9.4V17h14V9.4l-7 5z"/>',
 		'location'  => '<path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/>',
 		'arrow'     => '<path d="M5 11h10.6l-4.3-4.3L12.7 5l7 7-7 7-1.4-1.7 4.3-4.3H5v-2z"/>',
+		'chevron'   => '<path d="m7.4 8.6 4.6 4.6 4.6-4.6L18 10l-6 6-6-6 1.4-1.4z"/>',
+		'up'        => '<path d="m5 14 7-7 7 7-1.7 1.7-4.1-4.2V21h-2.4v-9.5l-4.1 4.2L5 14z"/>',
 		'check'     => '<path d="m9.2 16.2-4.4-4.4L3.4 13.2 9.2 19 21 7.2l-1.4-1.4z"/>',
 		'whatsapp'  => '<path d="M20.5 3.5A11.8 11.8 0 0 0 1.9 17.8L.3 23.7l6-1.6A11.7 11.7 0 0 0 12 23.5h.1A11.8 11.8 0 0 0 20.5 3.5zM12 21.5a9.7 9.7 0 0 1-5-1.4l-.4-.2-3.5.9.9-3.4-.2-.4A9.8 9.8 0 1 1 12 21.5zm5.4-7.3c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-1.8-.9-3-1.7-4.2-3.8-.3-.5.3-.5.9-1.6.1-.2 0-.4 0-.6l-.9-2.1c-.2-.5-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.2-1.2 3 0 1.7 1.3 3.4 1.5 3.7.2.2 2.5 3.8 6 5.3 2.2 1 3.1 1 4.2.8 1.3-.2 1.7-1.3 1.9-2.2.2-.8.2-1.6.1-1.8-.2-.3-.5-.4-.8-.5z"/>',
 	);

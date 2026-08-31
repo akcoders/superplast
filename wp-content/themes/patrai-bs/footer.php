@@ -10,7 +10,10 @@
 		<div class="container">
 			<div class="row g-5">
 				<div class="col-lg-4">
-					<div class="footer-brand"><?php echo patrai_bs_logo(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+					<div class="footer-brand-lockup">
+						<div class="footer-brand-mark"><?php echo patrai_bs_logo(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+						<div class="footer-brand-copy"><strong><?php echo esc_html( patrai_bs_option( 'company_name' ) ); ?></strong><span>Polymer engineering<br>since 1988</span></div>
+					</div>
 					<p><?php echo esc_html( patrai_bs_option( 'tagline' ) ); ?> — application-focused polymer products backed by manufacturing experience since 1988.</p>
 					<div class="footer-social d-flex gap-2">
 						<a href="<?php echo esc_url( patrai_bs_option( 'facebook' ) ); ?>" target="_blank" rel="noopener" aria-label="Facebook">f</a>
@@ -39,7 +42,7 @@
 				<div class="col-lg-4">
 					<h2><?php esc_html_e( 'Connect with us', 'patrai-bs' ); ?></h2>
 					<ul class="footer-contact">
-						<li><?php echo patrai_bs_icon( 'location' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><span><?php echo esc_html( patrai_bs_option( 'address' ) ); ?></span></li>
+						<li><?php echo patrai_bs_icon( 'location' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><a class="footer-address" href="<?php echo esc_url( patrai_bs_maps_url() ); ?>" target="_blank" rel="noopener" aria-label="<?php esc_attr_e( 'Open manufacturing address in Google Maps', 'patrai-bs' ); ?>"><?php echo esc_html( patrai_bs_option( 'address' ) ); ?><span>Open in Google Maps <?php echo patrai_bs_icon( 'arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span></a></li>
 						<li><?php echo patrai_bs_icon( 'phone' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><a href="<?php echo esc_url( patrai_bs_phone_href( patrai_bs_option( 'phone' ) ) ); ?>"><?php echo esc_html( patrai_bs_option( 'phone' ) ); ?></a></li>
 						<li><?php echo patrai_bs_icon( 'mail' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?><a href="mailto:<?php echo esc_attr( antispambot( patrai_bs_option( 'email' ) ) ); ?>"><?php echo esc_html( antispambot( patrai_bs_option( 'email' ) ) ); ?></a></li>
 					</ul>
@@ -58,6 +61,7 @@
 	<?php echo patrai_bs_icon( 'whatsapp' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 	<span><?php esc_html_e( 'WhatsApp', 'patrai-bs' ); ?></span>
 </a>
+<button class="back-to-top" type="button" aria-label="<?php esc_attr_e( 'Go to top', 'patrai-bs' ); ?>"><?php echo patrai_bs_icon( 'up' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
 <?php wp_footer(); ?>
 </body>
 </html>

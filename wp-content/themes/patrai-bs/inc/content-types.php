@@ -107,7 +107,7 @@ function patrai_bs_register_content_types() {
 		'patrai_product_category',
 		'patrai_product',
 		array(
-			'labels'            => array( 'name' => __( 'Product Categories', 'patrai-bs' ), 'singular_name' => __( 'Product Category', 'patrai-bs' ) ),
+			'labels'            => array( 'name' => __( 'Product Verticals', 'patrai-bs' ), 'singular_name' => __( 'Product Vertical', 'patrai-bs' ) ),
 			'public'            => true,
 			'show_in_rest'      => true,
 			'hierarchical'      => true,
