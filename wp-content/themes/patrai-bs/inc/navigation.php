@@ -190,6 +190,7 @@ function patrai_bs_product_menu_link_attributes( $attributes, $item, $args, $dep
 		$attributes['class']         = trim( ( isset( $attributes['class'] ) ? $attributes['class'] . ' ' : '' ) . 'product-menu-link' );
 		$attributes['aria-haspopup'] = 'true';
 		$attributes['aria-controls'] = 'patrai-product-mega-menu';
+		$attributes['aria-expanded'] = 'false';
 	}
 	return $attributes;
 }

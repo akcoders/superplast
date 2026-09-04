@@ -51,7 +51,7 @@ add_action( 'init', 'patrai_bs_repair_deployment_rewrites', PHP_INT_MAX );
  * Purge the pre-migration LiteSpeed page/object cache once on the live theme.
  */
 function patrai_bs_purge_deployment_cache() {
-	$purge_version = '1.1.0';
+	$purge_version = '1.1.1';
 	if ( $purge_version === get_option( 'patrai_bs_cache_purge_version' ) ) {
 		return;
 	}
@@ -287,7 +287,7 @@ function patrai_bs_menu_fallback() {
 		$target = 'Download Brochure' === $label ? ' target="_blank" rel="noopener"' : '';
 		$is_products = 'Our Products' === $label;
 		$class       = $is_products ? 'menu-item menu-item-has-children patrai-products-menu' : 'menu-item';
-		echo '<li class="' . esc_attr( $class ) . '"><a' . ( $is_products ? ' class="product-menu-link" aria-haspopup="true" aria-controls="patrai-product-mega-menu"' : '' ) . ' href="' . esc_url( $url ) . '"' . $target . '>' . esc_html( $label ) . '</a>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<li class="' . esc_attr( $class ) . '"><a' . ( $is_products ? ' class="product-menu-link" aria-haspopup="true" aria-controls="patrai-product-mega-menu" aria-expanded="false"' : '' ) . ' href="' . esc_url( $url ) . '"' . $target . '>' . esc_html( $label ) . '</a>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		if ( $is_products && function_exists( 'patrai_bs_product_mega_menu' ) ) {
 			echo patrai_bs_product_mega_menu(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}

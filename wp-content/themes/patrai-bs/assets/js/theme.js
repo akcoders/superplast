@@ -9,31 +9,69 @@
 
 		const toggle = menu.querySelector('.mega-menu-toggle');
 		if (!toggle) return;
+		const menuLink = menu.querySelector('.product-menu-link');
+		const supportsHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+		let closeTimer = null;
+		let pinnedOpen = false;
 
 		const setOpen = (open) => {
 			menu.classList.toggle('mega-open', open);
 			toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+			if (menuLink) menuLink.setAttribute('aria-expanded', open ? 'true' : 'false');
 		};
+		const cancelClose = () => {
+			if (!closeTimer) return;
+			window.clearTimeout(closeTimer);
+			closeTimer = null;
+		};
+		const scheduleClose = () => {
+			cancelClose();
+			if (pinnedOpen) return;
+			closeTimer = window.setTimeout(() => {
+				setOpen(false);
+				closeTimer = null;
+			}, 550);
+		};
+
+		if (supportsHover) {
+			menu.addEventListener('pointerenter', () => {
+				cancelClose();
+				setOpen(true);
+			});
+			menu.addEventListener('pointerleave', scheduleClose);
+		}
 
 		toggle.addEventListener('click', (event) => {
 			event.preventDefault();
 			event.stopPropagation();
-			setOpen(!menu.classList.contains('mega-open'));
+			cancelClose();
+			pinnedOpen = !pinnedOpen;
+			setOpen(pinnedOpen);
 		});
 
 		document.addEventListener('click', (event) => {
-			if (!menu.contains(event.target)) setOpen(false);
+			if (!menu.contains(event.target)) {
+				cancelClose();
+				pinnedOpen = false;
+				setOpen(false);
+			}
 		});
 
 		document.addEventListener('keydown', (event) => {
 			if (event.key === 'Escape') {
+				cancelClose();
+				pinnedOpen = false;
 				setOpen(false);
 				toggle.focus();
 			}
 		});
 
 		const navCollapse = document.getElementById('patraiPrimaryNav');
-		if (navCollapse) navCollapse.addEventListener('hidden.bs.collapse', () => setOpen(false));
+		if (navCollapse) navCollapse.addEventListener('hidden.bs.collapse', () => {
+			cancelClose();
+			pinnedOpen = false;
+			setOpen(false);
+		});
 	}
 
 	function initBackToTop() {
