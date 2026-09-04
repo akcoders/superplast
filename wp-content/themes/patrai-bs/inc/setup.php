@@ -51,7 +51,7 @@ add_action( 'init', 'patrai_bs_repair_deployment_rewrites', PHP_INT_MAX );
  * Purge the pre-migration LiteSpeed page/object cache once on the live theme.
  */
 function patrai_bs_purge_deployment_cache() {
-	$purge_version = '1.1.1';
+	$purge_version = '1.1.2';
 	if ( $purge_version === get_option( 'patrai_bs_cache_purge_version' ) ) {
 		return;
 	}
@@ -345,13 +345,27 @@ function patrai_bs_contact_submit() {
 	$name    = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
 	$email   = isset( $_POST['email'] ) ? sanitize_email( wp_unslash( $_POST['email'] ) ) : '';
 	$phone   = isset( $_POST['phone'] ) ? sanitize_text_field( wp_unslash( $_POST['phone'] ) ) : '';
-	$subject = isset( $_POST['subject'] ) ? sanitize_text_field( wp_unslash( $_POST['subject'] ) ) : 'Website enquiry';
+	$product = isset( $_POST['product'] ) ? sanitize_text_field( wp_unslash( $_POST['product'] ) ) : '';
 	$message = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
-	if ( ! $name || ! is_email( $email ) || ! $message ) {
+	$allowed_products = array( 'Other / Not sure' );
+	$product_ids      = get_posts(
+		array(
+			'post_type'      => 'patrai_product',
+			'post_status'    => 'publish',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+			'no_found_rows'  => true,
+		)
+	);
+	foreach ( $product_ids as $product_id ) {
+		$allowed_products[] = get_the_title( $product_id );
+	}
+	if ( ! $name || ! is_email( $email ) || ! $message || ! in_array( $product, $allowed_products, true ) ) {
 		wp_safe_redirect( add_query_arg( 'contact', 'invalid', $redirect ) );
 		exit;
 	}
-	$body = "Name: {$name}\nEmail: {$email}\nPhone: {$phone}\n\n{$message}";
+	$subject = 'Product enquiry - ' . $product;
+	$body    = "Name: {$name}\nEmail: {$email}\nPhone: {$phone}\nSelected product: {$product}\n\n{$message}";
 	$sent = wp_mail( patrai_bs_option( 'contact_recipient', get_option( 'admin_email' ) ), '[Super Plast Website] ' . $subject, $body, array( 'Reply-To: ' . $name . ' <' . $email . '>' ) );
 	wp_safe_redirect( add_query_arg( 'contact', $sent ? 'success' : 'failed', $redirect ) );
 	exit;

@@ -7,7 +7,8 @@
 get_header();
 while ( have_posts() ) : the_post();
 	get_template_part( 'template-parts/page', 'hero', array( 'title' => 'Contact Us', 'text' => 'Tell us what needs to work. We’ll help frame the product conversation.', 'image' => 'img/background/contact-us-banner.jpg' ) );
-	$status = isset( $_GET['contact'] ) ? sanitize_key( wp_unslash( $_GET['contact'] ) ) : '';
+	$status            = isset( $_GET['contact'] ) ? sanitize_key( wp_unslash( $_GET['contact'] ) ) : '';
+	$requested_product = isset( $_GET['product'] ) ? sanitize_text_field( wp_unslash( $_GET['product'] ) ) : '';
 	?>
 	<main id="main-content">
 		<section class="section-space contact-section"><div class="container"><div class="row g-5">
@@ -25,7 +26,7 @@ while ( have_posts() ) : the_post();
 					<div class="col-md-6"><label for="contact-name" class="form-label">Name <span>*</span></label><input class="form-control" id="contact-name" name="name" type="text" autocomplete="name" required></div>
 					<div class="col-md-6"><label for="contact-email" class="form-label">Email <span>*</span></label><input class="form-control" id="contact-email" name="email" type="email" autocomplete="email" required></div>
 					<div class="col-md-6"><label for="contact-phone" class="form-label">Phone</label><input class="form-control" id="contact-phone" name="phone" type="tel" autocomplete="tel"></div>
-					<div class="col-md-6"><label for="contact-subject" class="form-label">Requirement</label><select class="form-select" id="contact-subject" name="subject"><option>Product enquiry</option><option>Technical discussion</option><option>Request a quote</option><option>Brochure / company information</option></select></div>
+					<div class="col-md-6"><label for="contact-product" class="form-label">Requirement / Main product <span>*</span></label><select class="form-select" id="contact-product" name="product" required><option value="" disabled <?php selected( '', $requested_product ); ?>>Select a main product</option><?php foreach ( patrai_bs_product_verticals() as $vertical ) : ?><?php $vertical_products = patrai_bs_vertical_products( $vertical ); if ( ! $vertical_products ) { continue; } ?><optgroup label="<?php echo esc_attr( $vertical['name'] ); ?>"><?php foreach ( $vertical_products as $product ) : ?><?php $product_title = get_the_title( $product ); ?><option value="<?php echo esc_attr( $product_title ); ?>" <?php selected( $requested_product, $product_title ); ?>><?php echo esc_html( $product_title ); ?></option><?php endforeach; ?></optgroup><?php endforeach; ?><option value="Other / Not sure" <?php selected( $requested_product, 'Other / Not sure' ); ?>>Other / Not sure</option></select></div>
 					<div class="col-12"><label for="contact-message" class="form-label">Application details <span>*</span></label><textarea class="form-control" id="contact-message" name="message" rows="6" required placeholder="Please include application, dimensions, material, quantity or operating conditions where available."></textarea></div>
 					<div class="col-12"><button class="btn btn-primary btn-lg w-100" type="submit">Send Enquiry <?php echo patrai_bs_icon( 'arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button></div>
 				</form>
